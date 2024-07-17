@@ -12,7 +12,7 @@ Future<dynamic> main(final context) async {
      .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
      .setKey(Platform.environment['APPWRITE_API_KEY']);
   Teams teams = Teams(client);
-  ParseData parsing = await ParseData.fromJson(json.decode(context.req.body));
+  ParseData parsing = await ParseData.fromJson(json.decode(jsonEncode(context.req.body)));
   context.log('Hello, Logs!');
 
 
