@@ -27,7 +27,9 @@ Future<dynamic> main(final context) async {
       );
       context.log(result.userEmail);
     }  catch (e) {
-      print("paresed but I am here") ;
+      context.error("paresed but I am here");
+      context.error(e);
+
     }
 
     return context.res.send('Hello, World!');
