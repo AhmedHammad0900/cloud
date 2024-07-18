@@ -92,8 +92,8 @@ static Future<bool> updateUser(String theTeamId, String userEmail ) async {
     return true;
   } else {
     theFinalList = theOldAccess + theFinalRoles;
-    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalRoles);
-    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + $theFinalRoles" ;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
+    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + final Roles : $theFinalRoles + Old Access : $theOldAccess" ;
     return membership.confirm;
     }
    }
