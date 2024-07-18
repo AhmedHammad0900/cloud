@@ -84,6 +84,7 @@ Future<bool> updateUser(String theTeamId, String userEmail, final dynamic contex
     return true ;
   } else {
     theFinalList = theOldAccess + theFinalRoles ;
+    context.log("$theFinalList");
     Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
         membershipId: membershipList.memberships[0].$id,
         roles: theFinalList);
