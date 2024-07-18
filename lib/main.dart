@@ -33,8 +33,8 @@ Future<dynamic> main(final context) async {
     // balance = adminDocument.data['money'] ;
     // price = adminDocument.data['price'] ;
     try {
-      if (balance >= price ) {
-        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : "${balance-price}"}) ;
+      // if (balance >= price ) {
+      //   Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : "${balance-price}"}) ;
         Membership result = await teams.createMembership(
           teamId: parsing.teamId,
           roles: theFinalRoles,
@@ -43,7 +43,7 @@ Future<dynamic> main(final context) async {
           name: TextManager.nameUser
       );
         context.log("Added $theFinalRoles to ${result.userEmail}");
-      }
+      // }
 
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
