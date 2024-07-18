@@ -13,15 +13,16 @@ Future<dynamic> main(final context) async {
      .setKey(Platform.environment['APPWRITE_API_KEY']);
   Teams teams = Teams(client);
   ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
-  context.log(parsing.userEmail);
-  context.log(parsing.roles);
-  context.log(parsing.teamId);
   // The `req` object contains the request data
   if (context.req.method == 'POST') {
+    List<String> theFinalRoles = [] ;
+    for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
+      theFinalRoles.add(parsing.roles[i]) ;
+    }
     try {
       Membership result = await teams.createMembership(
           teamId: parsing.teamId,
-          roles: parsing.roles,
+          roles: theFinalRoles,
           email: parsing.userEmail,
           url: ""
       );
@@ -46,7 +47,7 @@ Future<dynamic> main(final context) async {
 class ParseData {
   final String teamId;
   final String userEmail;
-  final List<String> roles;
+  final List<dynamic> roles;
   final String? adminDocumentId;
   final String? newUserOrPlus;
 
