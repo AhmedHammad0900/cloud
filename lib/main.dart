@@ -4,47 +4,54 @@ import 'dart:io';
 import 'package:dart_appwrite/dart_appwrite.dart';
 import 'package:dart_appwrite/models.dart';
 
-// This is your Appwrite function
-// It's executed each time we get a request
+
+late Teams teams ;
+late Users users ;
+List<String> theFinalRoles = [] ;
+
 Future<dynamic> main(final context) async {
   final client = Client()
-     .setEndpoint('https://cloud.appwrite.io/v1')
-     .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
-     .setKey(Platform.environment['APPWRITE_API_KEY']);
-  Teams teams = Teams(client);
-  ParseData parsing = await ParseData.fromJson(json.decode(jsonEncode(context.req.body)));
-  context.log('Hello, Logs!');
-
-
+      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
+      .setKey(Platform.environment['APPWRITE_API_KEY']);
+  teams = Teams(client);
+  users = Users(client);
+  ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
   // The `req` object contains the request data
   if (context.req.method == 'POST') {
+    theFinalRoles = [] ;
+    for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
+      theFinalRoles.add(parsing.roles[i]) ;
+    }
     try {
       Membership result = await teams.createMembership(
           teamId: parsing.teamId,
-          roles: parsing.roles,
+          roles: theFinalRoles,
           email: parsing.userEmail,
-          url: ""
+          url: "https://cloud.appwrite.io",
+          name: "Dr.Dentist"
       );
       context.log(result.userEmail);
-    }  catch (e) {
-      context.error(e);
+    }  on AppwriteException catch (e) {
+      if (e.code == 409 ) {
+        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
+        context.log( "Updated ${parsing.userEmail}" );
+      }
     }
 
     return context.res.send('Hello, World!');
   }
 
-    return context.res.json({
-    'motto': 'Build like a team of hundreds_',
-    'learn': 'https://appwrite.io/docs',
-    'connect': 'https://appwrite.io/discord',
-    'getInspired': 'https://builtwith.appwrite.io',
-  });
+
+
+
 }
+
 
 class ParseData {
   final String teamId;
   final String userEmail;
-  final List<String> roles;
+  final List<dynamic> roles;
   final String? adminDocumentId;
   final String? newUserOrPlus;
 
@@ -61,5 +68,24 @@ class ParseData {
         roles: json['roles'],
         adminDocumentId: json['myId'],
         newUserOrPlus: json['newUserOrPlus']);
+  }
+}
+
+Future<bool> updateUser(String theTeamId, String userEmail, context) async{
+  List<String> theOldAccess = [] ;
+  List<String> theFinalList = [] ;
+  UserList theUser =  await users.list(search: userEmail);
+  MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
+  if ( membershipList.memberships[0].roles.toString().contains("FirstTerm")) {theOldAccess.add('"FirstTerm"') ; }
+  if ( membershipList.memberships[0].roles.toString().contains("SecondTerm")) {theOldAccess.add('"SecondTerm"') ; }
+  if ( theOldAccess == theFinalRoles ) {
+    context.log( "User : $userEmail /n Already Have the Same Access" );
+    return true ;
+  } else {
+    theFinalList = theOldAccess + theFinalList ;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
+        membershipId: membershipList.memberships[0].$id,
+        roles: theFinalList);
+    return membership.confirm;
   }
 }
