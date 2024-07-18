@@ -35,7 +35,6 @@ Future<dynamic> main(final context) async {
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
         updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
-        context.log( "Updated ${parsing.userEmail}" );
       }
     }
 
@@ -84,10 +83,11 @@ Future<bool> updateUser(String theTeamId, String userEmail, context) async{
     context.log( "User : $userEmail /n Already Have the Same Access" );
     return true ;
   } else {
-    theFinalList = theOldAccess + theFinalList ;
+    theFinalList = theOldAccess + theFinalRoles ;
     Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
         membershipId: membershipList.memberships[0].$id,
         roles: theFinalList);
+    context.log( "Updated ${ membershipList.memberships[0].userEmail}" );
     return membership.confirm;
   }
 }
