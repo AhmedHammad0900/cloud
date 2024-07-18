@@ -87,13 +87,17 @@ static Future<bool> updateUser(String theTeamId, String userEmail ) async {
   if (membershipList.memberships[0].roles.contains("SecondTerm")) {
     theOldAccess.add("SecondTerm");
   }
+  if ( theOldAccess.contains("FirstTerm") && theOldAccess.contains("SecondTerm")) {
+    theMessage = "User : '$userEmail' \n Already Have Both Terms" ;
+    return true;
+  }
   if ( listEquals( theOldAccess, theFinalRoles) == true) {
-    theMessage = "User : $userEmail /n Already Have the Same Access" ;
+    theMessage = "User : $userEmail \n  Already Have the Same Access" ;
     return true;
   } else {
     theFinalList = theOldAccess + theFinalRoles;
     Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
-    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + final Roles : $theFinalRoles + Old Access : $theOldAccess" ;
+    theMessage = "Updated '${membershipList.memberships[0].userEmail}' To :$theFinalRoles" ;
     return membership.confirm;
     }
    }
