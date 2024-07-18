@@ -78,6 +78,8 @@ Future<bool> updateUser(String theTeamId, String userEmail, context) async{
   MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
   if ( membershipList.memberships[0].roles.toString().contains("FirstTerm")) {theOldAccess.add('"FirstTerm"') ; }
   if ( membershipList.memberships[0].roles.toString().contains("SecondTerm")) {theOldAccess.add('"SecondTerm"') ; }
+  context.log(theOldAccess);
+  context.log(theFinalRoles);
   if ( theOldAccess == theFinalRoles ) {
     context.log( "User : $userEmail /n Already Have the Same Access" );
     return true ;
