@@ -3,10 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dart_appwrite/dart_appwrite.dart';
 import 'package:dart_appwrite/models.dart';
+import 'package:starter_template/TextManager.dart';
 
 
 late Teams teams ;
 late Users users ;
+late Databases databases ;
+int balance = 0 ;
+int price = 0 ;
+
 List<String> theFinalRoles = [] ;
 
 Future<dynamic> main(final context) async {
@@ -16,6 +21,7 @@ Future<dynamic> main(final context) async {
       .setKey(Platform.environment['APPWRITE_API_KEY']);
   teams = Teams(client);
   users = Users(client);
+  databases = Databases(client);
   ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
   // The `req` object contains the request data
   if (context.req.method == 'POST') {
@@ -23,28 +29,29 @@ Future<dynamic> main(final context) async {
     for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
       theFinalRoles.add(parsing.roles[i]) ;
     }
+    Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!) ;
+    balance = adminDocument.data['money'] ;
+    price = adminDocument.data['price'] ;
     try {
-      Membership result = await teams.createMembership(
+      if (balance >= price ) {
+        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : "${balance-price}"}) ;
+        Membership result = await teams.createMembership(
           teamId: parsing.teamId,
           roles: theFinalRoles,
           email: parsing.userEmail,
-          url: "https://cloud.appwrite.io",
-          name: "Dr.Dentist"
+          url: TextManager.url,
+          name: TextManager.nameUser
       );
-      context.log(result.userEmail);
+        context.log("Added $theFinalRoles to ${result.userEmail}");
+      }
+
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
         await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
         context.log(UpdateUserClass.theMessage);
       }
     }
-
-    return context.res.send('Hello, World!');
   }
-
-
-
-
 }
 
 
@@ -66,10 +73,11 @@ class ParseData {
         teamId: json['teamId'],
         userEmail: json['userEmail'],
         roles: json['roles'],
-        adminDocumentId: json['myId'],
+        adminDocumentId: json['adminId'],
         newUserOrPlus: json['newUserOrPlus']);
   }
 }
+
 
 
 class UpdateUserClass {
