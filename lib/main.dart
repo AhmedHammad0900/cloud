@@ -19,6 +19,7 @@ Future<dynamic> main(final context) async {
   ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
   // The `req` object contains the request data
   if (context.req.method == 'POST') {
+    theFinalRoles = [] ;
     for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
       theFinalRoles.add(parsing.roles[i]) ;
     }
