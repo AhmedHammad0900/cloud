@@ -28,12 +28,12 @@ Future<dynamic> main(final context) async {
     for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
       theFinalRoles.add(parsing.roles[i]) ;
     }
-    // Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!) ;
-    // balance = adminDocument.data['money'] ;
-    // price = adminDocument.data['price'] ;
+    Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId) ;
+    balance = adminDocument.data['money'] ;
+    price = adminDocument.data['price'] ;
     try {
-      // if (balance >= price ) {
-      //   Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : "${balance-price}"}) ;
+      if (balance >= price ) {
+        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : balance-price}) ;
         Membership result = await teams.createMembership(
           teamId: parsing.teamId,
           roles: theFinalRoles,
@@ -41,15 +41,16 @@ Future<dynamic> main(final context) async {
           url: TextManager.url,
           name: TextManager.nameUser
       );
-        context.log("Added $theFinalRoles to ${result.userEmail}");
-      // }
+       return context.res.send("Added $theFinalRoles to ${result.userEmail}");
+      }
 
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
         await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
-        context.log(UpdateUserClass.theMessage + parsing.adminDocumentId!);
+        context.log(UpdateUserClass.theMessage);
       }
     }
+    context.res.send("hello world");
   }
 }
 
