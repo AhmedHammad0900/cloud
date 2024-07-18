@@ -41,7 +41,7 @@ Future<dynamic> main(final context) async {
           url: TextManager.url,
           name: TextManager.nameUser
       );
-       return context.res.send("Added $theFinalRoles to ${result.userEmail}");
+       return context.log("Added $theFinalRoles to ${result.userEmail}");
       }
 
     }  on AppwriteException catch (e) {
