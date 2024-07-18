@@ -29,9 +29,9 @@ Future<dynamic> main(final context) async {
     for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
       theFinalRoles.add(parsing.roles[i]) ;
     }
-    Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!) ;
-    balance = adminDocument.data['money'] ;
-    price = adminDocument.data['price'] ;
+    // Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!) ;
+    // balance = adminDocument.data['money'] ;
+    // price = adminDocument.data['price'] ;
     try {
       if (balance >= price ) {
         Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : "${balance-price}"}) ;
@@ -65,7 +65,7 @@ class ParseData {
   const ParseData({required this.teamId,
     required this.userEmail,
     required this.roles,
-    this.adminDocumentId,
+    required this.adminDocumentId,
     this.newUserOrPlus});
 
   factory ParseData.fromJson(Map<String, dynamic> json) {
