@@ -11,9 +11,9 @@ List<String> theFinalRoles = [] ;
 
 Future<dynamic> main(final context) async {
   final client = Client()
-     .setEndpoint('https://cloud.appwrite.io/v1')
-     .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
-     .setKey(Platform.environment['APPWRITE_API_KEY']);
+      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
+      .setKey(Platform.environment['APPWRITE_API_KEY']);
   teams = Teams(client);
   users = Users(client);
   ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
@@ -34,8 +34,8 @@ Future<dynamic> main(final context) async {
       context.log(result.userEmail);
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
-        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
-        context.log( "Updated ${parsing.userEmail}" );
+        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
+        context.log(UpdateUserClass.theMessage);
       }
     }
 
@@ -71,21 +71,52 @@ class ParseData {
   }
 }
 
-Future<bool> updateUser(String theTeamId, String userEmail, context) async{
-  List<String> theOldAccess = [] ;
-  List<String> theFinalList = [] ;
-  UserList theUser =  await users.list(search: userEmail);
-  MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
-  if ( membershipList.memberships[0].roles.toString().contains("FirstTerm")) {theOldAccess.add('"FirstTerm"') ; }
-  if ( membershipList.memberships[0].roles.toString().contains("SecondTerm")) {theOldAccess.add('"SecondTerm"') ; }
-  if ( theOldAccess == theFinalRoles ) {
-    context.log( "User : $userEmail /n Already Have the Same Access" );
-    return true ;
-  } else {
-    theFinalList = theOldAccess + theFinalList ;
-    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
-        membershipId: membershipList.memberships[0].$id,
-        roles: theFinalList);
-    return membership.confirm;
+
+class UpdateUserClass {
+  static String theMessage = "" ;
+
+
+  static Future<bool> updateUser(String theTeamId, String userEmail ) async {
+    List<String> theOldAccess = [];
+    List<String> theFinalList = [];
+    UserList theUser = await users.list(search: userEmail);
+    MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id);
+    if (membershipList.memberships[0].roles.toString().contains("FirstTerm")) {
+      theOldAccess.add("FirstTerm");
+    }
+    if (membershipList.memberships[0].roles.contains("SecondTerm")) {
+      theOldAccess.add("SecondTerm");
+    }
+    if ( theOldAccess.contains("FirstTerm") && theOldAccess.contains("SecondTerm")) {
+      theMessage = "User : '$userEmail' \nAlready Have Both Terms" ;
+      return true;
+    }
+    if ( listEquals( theOldAccess, theFinalRoles) == true) {
+      theMessage = "User : $userEmail \nAlready Have the Same Access" ;
+      return true;
+    } else {
+      theFinalList = theOldAccess + theFinalRoles;
+      Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
+      theMessage = "Updated '${membershipList.memberships[0].userEmail}' To :$theFinalRoles" ;
+      return membership.confirm;
+    }
   }
+}
+
+bool listEquals<T>(List<T>? a, List<T>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
 }
