@@ -34,7 +34,8 @@ Future<dynamic> main(final context) async {
       context.log(result.userEmail);
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
-        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
+        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
+        context.log(UpdateUserClass.theMessage);
       }
     }
 
@@ -70,12 +71,32 @@ class ParseData {
   }
 }
 
-Future<bool> updateUser(String theTeamId, String userEmail,) async{
-  List<String> theOldAccess = [] ;
-  List<String> theFinalList = [] ;
-  UserList theUser =  await users.list(search: userEmail);
-  MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
-  Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
-  membershipId: membershipList.memberships[0].$id, roles: theFinalList);
-  return membership.confirm;
+
+class UpdateUserClass {
+ static String theMessage = "" ;
+
+
+static Future<bool> updateUser(String theTeamId, String userEmail ) async {
+  List<String> theOldAccess = [];
+  List<String> theFinalList = [];
+  UserList theUser = await users.list(search: userEmail);
+  MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id);
+  if (membershipList.memberships[0].roles.toString().contains("FirstTerm")) {
+    theOldAccess.add('"FirstTerm"');
   }
+  if (membershipList.memberships[0].roles.toString().contains("SecondTerm")) {
+    theOldAccess.add('"SecondTerm"');
+  }
+  theMessage = "${theOldAccess.toString()} + ${theFinalRoles.toString()} ";
+  if (theOldAccess == theFinalRoles) {
+    theMessage = "User : $userEmail /n Already Have the Same Access" ;
+    return true;
+  } else {
+    theFinalList = theOldAccess + theFinalRoles;
+    theMessage = "$theFinalRoles" ;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id,roles: theFinalList);
+    theMessage = "Updated ${ membershipList.memberships[0].userEmail}" ;
+    return membership.confirm;
+  }
+}
+}
