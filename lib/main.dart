@@ -26,7 +26,7 @@ Future<dynamic> main(final context) async {
           teamId: parsing.teamId,
           roles: theFinalRoles,
           email: parsing.userEmail,
-          url: ""
+          url: "cloud.appwrite.io"
       );
       context.log(result.userEmail);
     }  catch (e) {
