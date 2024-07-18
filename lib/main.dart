@@ -12,10 +12,10 @@ Future<dynamic> main(final context) async {
      .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
      .setKey(Platform.environment['APPWRITE_API_KEY']);
   Teams teams = Teams(client);
-  ParseData parsing = await ParseData.fromJson(json.decode(context.req.body));
-  // context.log('Hello, sss!');
-
-
+  ParseData parsing = ParseData.fromJson(json.decode(context.req.body));
+  context.log(parsing.userEmail);
+  context.log(parsing.roles);
+  context.log(parsing.teamId);
   // The `req` object contains the request data
   if (context.req.method == 'POST') {
     try {
