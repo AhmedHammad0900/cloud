@@ -11,7 +11,6 @@ late Users users ;
 late Databases databases ;
 int balance = 0 ;
 int price = 0 ;
-
 List<String> theFinalRoles = [] ;
 
 Future<dynamic> main(final context) async {
@@ -59,7 +58,7 @@ class ParseData {
   final String teamId;
   final String userEmail;
   final List<dynamic> roles;
-  final String? adminDocumentId;
+  final String adminDocumentId;
   final String? newUserOrPlus;
 
   const ParseData({required this.teamId,
