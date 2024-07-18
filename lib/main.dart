@@ -34,10 +34,9 @@ Future<dynamic> main(final context) async {
       context.log(result.userEmail);
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
-        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
+        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
         context.log( "Updated ${parsing.userEmail}" );
       }
-
     }
 
     return context.res.send('Hello, World!');
@@ -72,9 +71,21 @@ class ParseData {
   }
 }
 
-Future<bool> updateUser(String theTeamId, String userEmail) async{
+Future<bool> updateUser(String theTeamId, String userEmail, context) async{
+  List<String> theOldAccess = [] ;
+  List<String> theFinalList = [] ;
   UserList theUser =  await users.list(search: userEmail);
   MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
-  Membership membership = await teams.updateMembershipRoles(teamId: theTeamId, membershipId: membershipList.memberships[0].$id, roles: theFinalRoles) ;
-  return membership.confirm ;
+  if ( membershipList.memberships[0].roles.toString().contains("FirstTerm")) {theOldAccess.add('"FirstTerm"') ; }
+  if ( membershipList.memberships[0].roles.toString().contains("SecondTerm")) {theOldAccess.add('"SecondTerm"') ; }
+  if ( theOldAccess == theFinalRoles ) {
+    context.log( "User : $userEmail /n Already Have the Same Access" );
+    return true ;
+  } else {
+    theFinalList = theOldAccess + theFinalList ;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
+        membershipId: membershipList.memberships[0].$id,
+        roles: theFinalList);
+    return membership.confirm;
+  }
 }
