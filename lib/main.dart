@@ -77,25 +77,25 @@ class UpdateUserClass {
 
 
 static Future<bool> updateUser(String theTeamId, String userEmail ) async {
-  List<String> theOldAccess = [];
-  List<String> theFinalList = [];
+  // List<String> theOldAccess = [];
+  // List<String> theFinalList = [];
   UserList theUser = await users.list(search: userEmail);
   MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id);
-  if (membershipList.memberships[0].roles.contains("FirstTerm")) {
-    theOldAccess.add('"FirstTerm"');
-  }
-  if (membershipList.memberships[0].roles.contains("SecondTerm")) {
-    theOldAccess.add('"SecondTerm"');
-  }
-  theMessage = "$theOldAccess + $theFinalRoles ";
-  if (theOldAccess == theFinalRoles) {
-    theMessage = "User : $userEmail /n Already Have the Same Access" ;
-    return true;
-  } else {
-    theFinalList = theOldAccess + theFinalRoles;
-    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
-    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + $theFinalList" ;
+  // if (membershipList.memberships[0].roles.contains("FirstTerm")) {
+  //   theOldAccess.add('"FirstTerm"');
+  // }
+  // if (membershipList.memberships[0].roles.contains("SecondTerm")) {
+  //   theOldAccess.add('"SecondTerm"');
+  // }
+  // theMessage = "$theOldAccess + $theFinalRoles ";
+  // if (theOldAccess == theFinalRoles) {
+  //   theMessage = "User : $userEmail /n Already Have the Same Access" ;
+  //   return true;
+  // } else {
+    // theFinalList = theOldAccess + theFinalRoles;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalRoles);
+    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + $theFinalRoles" ;
     return membership.confirm;
   }
 }
-}
+// }
