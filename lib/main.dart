@@ -81,21 +81,20 @@ static Future<bool> updateUser(String theTeamId, String userEmail ) async {
   List<String> theFinalList = [];
   UserList theUser = await users.list(search: userEmail);
   MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id);
-  if (membershipList.memberships[0].roles.toString().contains("FirstTerm")) {
+  if (membershipList.memberships[0].roles.contains("FirstTerm")) {
     theOldAccess.add('"FirstTerm"');
   }
-  if (membershipList.memberships[0].roles.toString().contains("SecondTerm")) {
+  if (membershipList.memberships[0].roles.contains("SecondTerm")) {
     theOldAccess.add('"SecondTerm"');
   }
-  theMessage = "${theOldAccess.toString()} + ${theFinalRoles.toString()} ";
+  theMessage = "$theOldAccess + $theFinalRoles ";
   if (theOldAccess == theFinalRoles) {
     theMessage = "User : $userEmail /n Already Have the Same Access" ;
     return true;
   } else {
     theFinalList = theOldAccess + theFinalRoles;
-    theMessage = "$theFinalRoles" ;
-    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id,roles: theFinalList);
-    theMessage = "Updated ${ membershipList.memberships[0].userEmail}" ;
+    Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
+    theMessage = "Updated ${ membershipList.memberships[0].userEmail} + $theFinalList" ;
     return membership.confirm;
   }
 }
