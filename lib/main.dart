@@ -19,6 +19,8 @@ Future<dynamic> main(final context) async {
     for ( int i = 0 ; i < parsing.roles.length ; i ++ ) {
       theFinalRoles.add(parsing.roles[i]) ;
     }
+    context.log(theFinalRoles);
+    context.log(theFinalRoles.runtimeType);
     try {
       Membership result = await teams.createMembership(
           teamId: parsing.teamId,
