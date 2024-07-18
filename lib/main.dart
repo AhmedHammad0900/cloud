@@ -34,7 +34,8 @@ Future<dynamic> main(final context) async {
       context.log(result.userEmail);
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
-        updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , context);
+        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
+        context.log(UpdateUserClass.theMessage);
       }
     }
 
@@ -70,25 +71,30 @@ class ParseData {
   }
 }
 
-Future<bool> updateUser(String theTeamId, String userEmail, final dynamic context) async{
+
+class UpdateUserClass {
+
+static String theMessage = "" ;
+
+static Future<bool> updateUser(String theTeamId, String userEmail ) async{
   List<String> theOldAccess = [] ;
   List<String> theFinalList = [] ;
   UserList theUser =  await users.list(search: userEmail);
   MembershipList membershipList = await teams.listMemberships(teamId: theTeamId, search: theUser.users[0].$id) ;
   if ( membershipList.memberships[0].roles.toString().contains("FirstTerm")) {theOldAccess.add('"FirstTerm"') ; }
   if ( membershipList.memberships[0].roles.toString().contains("SecondTerm")) {theOldAccess.add('"SecondTerm"') ; }
-  context.log("$theOldAccess");
-  context.log("$theFinalRoles");
+  theMessage = "$theOldAccess  - $theFinalRoles " ;
   if ( theOldAccess == theFinalRoles ) {
-    context.log( "User : $userEmail /n Already Have the Same Access" );
+    theMessage =  "User : $userEmail /n Already Have the Same Access" ;
     return true ;
   } else {
     theFinalList = theOldAccess + theFinalRoles ;
-    context.log("$theFinalList");
+    theMessage = "$theFinalList" ;
     Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,
         membershipId: membershipList.memberships[0].$id,
         roles: theFinalList);
-    context.log( "Updated ${ membershipList.memberships[0].userEmail}" );
+    theMessage =  "Updated ${ membershipList.memberships[0].userEmail}" ;
     return membership.confirm;
   }
+}
 }
