@@ -88,11 +88,11 @@ static Future<bool> updateUser(String theTeamId, String userEmail ) async {
     theOldAccess.add("SecondTerm");
   }
   if ( theOldAccess.contains("FirstTerm") && theOldAccess.contains("SecondTerm")) {
-    theMessage = "User : '$userEmail' \n Already Have Both Terms" ;
+    theMessage = "User : '$userEmail' \nAlready Have Both Terms" ;
     return true;
   }
   if ( listEquals( theOldAccess, theFinalRoles) == true) {
-    theMessage = "User : $userEmail \n  Already Have the Same Access" ;
+    theMessage = "User : $userEmail \nAlready Have the Same Access" ;
     return true;
   } else {
     theFinalList = theOldAccess + theFinalRoles;
