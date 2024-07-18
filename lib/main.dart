@@ -48,7 +48,7 @@ Future<dynamic> main(final context) async {
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
         await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
-        context.log(UpdateUserClass.theMessage);
+        context.log(UpdateUserClass.theMessage + parsing.teamId);
       }
     }
   }
