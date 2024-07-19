@@ -50,6 +50,8 @@ Future<dynamic> main(final context) async {
           'getInspired': 'https://builtwith.appwrite.io',
         });
 
+      } else {
+        context.error('No Enough Money');
       }
 
     }  on AppwriteException catch (e) {
