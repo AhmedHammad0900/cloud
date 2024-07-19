@@ -41,7 +41,15 @@ Future<dynamic> main(final context) async {
           url: TextManager.url,
           name: TextManager.nameUser
       );
-       return context.log("Added $theFinalRoles to ${result.userEmail}");
+
+       context.log("Added $theFinalRoles to ${result.userEmail}");
+        return context.res.json({
+          'motto': 'Build like a team of hundreds_',
+          'learn': 'https://appwrite.io/docs',
+          'connect': 'https://appwrite.io/discord',
+          'getInspired': 'https://builtwith.appwrite.io',
+        });
+
       }
 
     }  on AppwriteException catch (e) {
@@ -51,6 +59,12 @@ Future<dynamic> main(final context) async {
       }
     }
     context.res.send("hello world");
+    return context.res.json({
+      'motto': 'Build like a team of hundreds_',
+      'learn': 'https://appwrite.io/docs',
+      'connect': 'https://appwrite.io/discord',
+      'getInspired': 'https://builtwith.appwrite.io',
+    });
   }
 }
 
