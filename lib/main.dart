@@ -32,8 +32,7 @@ Future<dynamic> main(final context) async {
     balance = adminDocument.data['money'] ;
     price = adminDocument.data['price'] ;
     try {
-      if (balance >= price ) {
-        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId!, data: {"money" : balance-price}) ;
+      if (theFinalRoles.length == 2 ? balance >= ( 2 * price ) :  balance >= price ) {
         Membership result = await teams.createMembership(
           teamId: parsing.teamId,
           roles: theFinalRoles,
@@ -41,32 +40,31 @@ Future<dynamic> main(final context) async {
           url: TextManager.url,
           name: TextManager.nameUser
       );
-
+        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId, data: {"money" : theFinalRoles.length == 2  ?  balance - ( 2 * price ) : balance - price }) ;
        context.log("Added $theFinalRoles to ${result.userEmail}");
-        return context.res.json({
-          'motto': 'Build like a team of hundreds_',
-          'learn': 'https://appwrite.io/docs',
-          'connect': 'https://appwrite.io/discord',
-          'getInspired': 'https://builtwith.appwrite.io',
-        });
-
+        return context.res.send("User '${result.userEmail}' Had Been Added ");
       } else {
-        context.error('No Enough Money');
+        context.error('No Enough Money To Add New User');
       }
 
     }  on AppwriteException catch (e) {
       if (e.code == 409 ) {
-        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) );
-        context.log(UpdateUserClass.theMessage);
-      }
+        if ( balance >= price ) {
+        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , parsing.adminDocumentId);
+       context.log(UpdateUserClass.theMessage);
+       return context.res.send(UpdateUserClass.theMessage);
+        } else {
+       context.error('No Enough Balance To Update "${parsing.userEmail}" Access');
+        }
     }
-    context.res.send("hello world");
-    return context.res.json({
-      'motto': 'Build like a team of hundreds_',
-      'learn': 'https://appwrite.io/docs',
-      'connect': 'https://appwrite.io/discord',
-      'getInspired': 'https://builtwith.appwrite.io',
-    });
+  }
+    // context.res.send("hello world");
+    // return context.res.json({
+    //   'motto': 'Build like a team of hundreds_',
+    //   'learn': 'https://appwrite.io/docs',
+    //   'connect': 'https://appwrite.io/discord',
+    //   'getInspired': 'https://builtwith.appwrite.io',
+    // });
   }
 }
 
@@ -100,7 +98,7 @@ class UpdateUserClass {
  static String theMessage = "" ;
 
 
-static Future<bool> updateUser(String theTeamId, String userEmail ) async {
+static Future<bool> updateUser(String theTeamId, String userEmail, String adminDocumentId ) async {
   List<String> theOldAccess = [];
   List<String> theFinalList = [];
   UserList theUser = await users.list(search: userEmail);
@@ -113,14 +111,15 @@ static Future<bool> updateUser(String theTeamId, String userEmail ) async {
   }
   if ( theOldAccess.contains("FirstTerm") && theOldAccess.contains("SecondTerm")) {
     theMessage = "User : '$userEmail' \nAlready Have Both Terms" ;
-    return true;
+    return false;
   }
   if ( listEquals( theOldAccess, theFinalRoles) == true) {
     theMessage = "User : $userEmail \nAlready Have the Same Access" ;
-    return true;
+    return false;
   } else {
     theFinalList = theOldAccess + theFinalRoles;
     Membership membership = await teams.updateMembershipRoles(teamId: theTeamId,membershipId: membershipList.memberships[0].$id, roles: theFinalList);
+    Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: adminDocumentId, data: {"money" : balance-price}) ;
     theMessage = "Updated '${membershipList.memberships[0].userEmail}' To :$theFinalRoles" ;
     return membership.confirm;
     }
