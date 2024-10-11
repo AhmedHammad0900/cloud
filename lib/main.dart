@@ -15,7 +15,7 @@ List<String> theFinalRoles = [] ;
 
 Future<dynamic> main(final context) async {
   final client = Client()
-      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setEndpoint('${TextManager.url}/v1')
       .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
       .setKey(Platform.environment['APPWRITE_API_KEY']);
   teams = Teams(client);
