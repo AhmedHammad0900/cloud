@@ -64,7 +64,7 @@ Future<dynamic> main(final context) async {
       }
     } else {
       context.log("User Not Found");
-      context.error('User Not Found');
+      return context.res.send("User ${parsing.userEmail} Not Found");
     }
 
     // context.res.send("hello world");
