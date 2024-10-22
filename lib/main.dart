@@ -31,33 +31,42 @@ Future<dynamic> main(final context) async {
     Document adminDocument = await databases.getDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId) ;
     balance = adminDocument.data['money'] ;
     price = adminDocument.data['price'] ;
-    try {
-      if (theFinalRoles.length == 2 ? balance >= ( 2 * price ) :  balance >= price ) {
-        Membership result = await teams.createMembership(
-          teamId: parsing.teamId,
-          roles: theFinalRoles,
-          email: parsing.userEmail,
-          url: TextManager.url,
-          name: TextManager.nameUser
-      );
-        Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId, data: {"money" : theFinalRoles.length == 2  ?  balance - ( 2 * price ) : balance - price }) ;
-       context.log("Added $theFinalRoles to ${result.userEmail}");
-        return context.res.send("User '${result.userEmail}' Had Been Added ");
-      } else {
-        context.error('No Enough Money To Add New User');
-      }
-
-    }  on AppwriteException catch (e) {
-      if (e.code == 409 ) {
-        if ( balance >= price ) {
-        await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , parsing.adminDocumentId);
-       context.log(UpdateUserClass.theMessage);
-       return context.res.send(UpdateUserClass.theMessage);
+    UserList theUserChecker = await users.list(
+      search: parsing.userEmail.substring(0 , parsing.userEmail.indexOf("@") )
+    );
+    if ( theUserChecker.total >= 1 ) {
+      try {
+        if (theFinalRoles.length == 2 ? balance >= ( 2 * price ) :  balance >= price ) {
+          Membership result = await teams.createMembership(
+              teamId: parsing.teamId,
+              roles: theFinalRoles,
+              email: parsing.userEmail,
+              url: TextManager.url,
+              name: TextManager.nameUser
+          );
+          Document adminDocument = await databases.updateDocument(databaseId: TextManager.managementDatabase, collectionId: TextManager.managerCollections, documentId: parsing.adminDocumentId, data: {"money" : theFinalRoles.length == 2  ?  balance - ( 2 * price ) : balance - price }) ;
+          context.log("Added $theFinalRoles to ${result.userEmail}");
+          return context.res.send("User '${result.userEmail}' Had Been Added ");
         } else {
-       context.error('No Enough Balance To Update "${parsing.userEmail}" Access');
+          context.error('No Enough Money To Add New User');
         }
+
+      }  on AppwriteException catch (e) {
+        if (e.code == 409 ) {
+          if ( balance >= price ) {
+            await UpdateUserClass.updateUser( parsing.teamId, parsing.userEmail.substring(0, parsing.userEmail.indexOf("@")) , parsing.adminDocumentId);
+            context.log(UpdateUserClass.theMessage);
+            return context.res.send(UpdateUserClass.theMessage);
+          } else {
+            context.error('No Enough Balance To Update "${parsing.userEmail}" Access');
+          }
+        }
+      }
+    } else {
+      context.log("User Not Found");
+      context.error('User Not Found');
     }
-  }
+
     // context.res.send("hello world");
     // return context.res.json({
     //   'motto': 'Build like a team of hundreds_',
